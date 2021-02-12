@@ -2,6 +2,7 @@ import secrets
 from configparser import ConfigParser
 from functools import wraps
 
+import requests
 from flask import Flask, jsonify, request
 from tractus import Tracer
 
@@ -62,7 +63,8 @@ def setup():
         "data": {
             "secret": secret,
             "name": name,
-            "id": agent_id
+            "id": agent_id,
+            "location": requests.get("https://ipapi.co/json/").json()["country"]
         }
     })
 
