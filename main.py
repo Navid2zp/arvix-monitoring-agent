@@ -64,7 +64,7 @@ def setup():
             "secret": secret,
             "name": name,
             "id": agent_id,
-            "location": requests.get("https://ipapi.co/json/").json()["country"]
+            "meta": requests.get("https://ipapi.co/json/").json()
         }
     })
 
