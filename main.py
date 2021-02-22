@@ -69,13 +69,39 @@ def setup():
     })
 
 
-@app.route('/trace')
+@app.route('/trace', methods=['POST'])
 @authentication_required()
 def index():
-    url = request.args.get("url", "")
-    tracer = Tracer(url).trace()
+    headers = request.json.get("headers", {})
+    data = request.json.get("data", None)
+    if data == "":
+        data = None
+    method = request.json.get("method", "get").upper()
+    tracer = Tracer(
+        url=request.json["url"],
+        method=method,
+        headers=headers,
+        data=data
+    ).trace()
     return jsonify(tracer.as_dict())
 
 
+@app.route('/test', methods=['POST', "PUT", "PATCH", "GET", "DELETE", "HEAD", "OPTIONS"])
+def test():
+    print(request.method)
+    print("FORM:", request.form)
+    print("JSON:", request.json)
+    print("DATA:", request.data)
+    return jsonify({"haha": "haha"})
+
+
 if __name__ == '__main__':
+    # tracer = Tracerr(
+    #     url="https://arvix.cloud",
+    #     method="GET",
+    #     headers={},
+    #     data=None
+    # )
+    # print(tracer.trace().as_json())
+    # print(type(b'sd') == bytes)
     app.run(debug=True)
