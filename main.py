@@ -58,15 +58,16 @@ def setup():
         config.write(configfile)
     set_config(app)
 
-    return jsonify({
+    response = {
         "status": "ok",
         "data": {
             "secret": secret,
             "name": name,
             "id": agent_id,
-            "meta": requests.get("https://ipapi.co/json/").json()
         }
-    })
+    }
+    response["data"].update(requests.get("https://ipapi.co/json",).json())
+    return jsonify(response)
 
 
 @app.route('/trace', methods=['POST'])
