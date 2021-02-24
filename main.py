@@ -64,9 +64,14 @@ def setup():
             "secret": secret,
             "name": name,
             "id": agent_id,
+            "meta": requests.get("https://api.ipgeolocation.io/ipgeo?apiKey=0ba46625ecf4430e80318749f13499df").json()
         }
     }
-    response["data"].update(requests.get("https://ipapi.co/json",).json())
+    response["data"]["meta"]["latitude"] = float(response["data"]["meta"]["latitude"])
+    response["data"]["meta"]["longitude"] = float(response["data"]["meta"]["longitude"])
+    # response["data"].update(
+    #     requests.get("https://api.ipgeolocation.io/ipgeo?apiKey=0ba46625ecf4430e80318749f13499df").json()
+    # )
     return jsonify(response)
 
 
