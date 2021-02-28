@@ -1,7 +1,6 @@
 import secrets
 from configparser import ConfigParser
 from functools import wraps
-
 import requests
 from flask import Flask, jsonify, request
 from tractus import Tracer
@@ -69,9 +68,6 @@ def setup():
     }
     response["data"]["meta"]["latitude"] = float(response["data"]["meta"]["latitude"])
     response["data"]["meta"]["longitude"] = float(response["data"]["meta"]["longitude"])
-    # response["data"].update(
-    #     requests.get("https://api.ipgeolocation.io/ipgeo?apiKey=0ba46625ecf4430e80318749f13499df").json()
-    # )
     return jsonify(response)
 
 
@@ -89,6 +85,7 @@ def index():
         headers=headers,
         data=data
     ).trace()
+    print(tracer.as_dict())
     return jsonify(tracer.as_dict())
 
 
