@@ -1,9 +1,11 @@
 import secrets
 from configparser import ConfigParser
 from functools import wraps
+
+import pycurl
 import requests
 from flask import Flask, jsonify, request
-from tractus import Tracer
+from tractus import Tracer, TraceResult
 
 
 def set_config(flask_app: Flask):
@@ -73,20 +75,26 @@ def setup():
 
 @app.route('/trace', methods=['POST'])
 @authentication_required()
-def index():
+def tracer():
     headers = request.json.get("headers", {})
     data = request.json.get("data", None)
     if data == "":
         data = None
     method = request.json.get("method", "get").upper()
-    tracer = Tracer(
-        url=request.json["url"],
-        method=method,
-        headers=headers,
-        data=data
-    ).trace()
-    print(tracer.as_dict())
-    return jsonify(tracer.as_dict())
+
+    try:
+        trace = Tracer(
+            url=request.json["url"],
+            method=method,
+            headers=headers,
+            data=data,
+            timeout=120
+        ).trace()
+    except pycurl.error as e:
+        return jsonify(TraceResult().as_dict())
+    except Exception as e:
+        return jsonify({"status": "error", "error": str(e)}), 500
+    return jsonify(trace.as_dict())
 
 
 @app.route('/test', methods=['POST', "PUT", "PATCH", "GET", "DELETE", "HEAD", "OPTIONS"])
@@ -99,12 +107,9 @@ def test():
 
 
 if __name__ == '__main__':
-    # tracer = Tracerr(
-    #     url="https://arvix.cloud",
-    #     method="GET",
-    #     headers={},
-    #     data=None
+    # trace = Tracer(
+    #     url="https://arvix.studio",
     # )
-    # print(tracer.trace().as_json())
+    # print(trace.trace().as_json())
     # print(type(b'sd') == bytes)
     app.run(debug=True)
