@@ -3,17 +3,13 @@ on:
   push:
     branches: ['main']
 jobs:
-  build-and-push-image:
+  build-and-publish-latest:
     runs-on: ubuntu-latest
     steps:
-    - name: Checkout
-      uses: actions/checkout@v2
-    - name: Build container image
-      uses: docker/build-push-action@v2
-      with:
-        username: ${{ github.actor }}
-        password: ${{ secrets.GITHUB_TOKEN }}
-        registry: docker.pkg.github.com
-        repository: ${{ github.repository }}/arvix-monitoring-agent
-        tag_with_sha: true
-        tag_with_ref: true
+      - uses: actions/checkout@v2
+
+      - name: Build and Publish latest Docker image
+        uses: VaultVulp/gp-docker-action@1.1.7
+        with:
+          github-token: ${{ secrets.GITHUB_TOKEN }}
+          image-name: arvix-monitoring-agent
