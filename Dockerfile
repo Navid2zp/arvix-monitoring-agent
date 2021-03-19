@@ -1,12 +1,14 @@
-FROM python:3
+FROM tiangolo/uvicorn-gunicorn:python3.8-alpine3.10
 
-WORKDIR /home/agent
+# Needed for the pycurl compilation
+ENV PYCURL_SSL_LIBRARY=openssl
 
-RUN apt-get install libcurl4-openssl-dev libssl-dev
+COPY ./requirements.txt .
 
-COPY requirements.txt ./
-RUN pip install -r requirements.txt
+RUN apk add -u --no-cache libcurl libstdc++ \
+    && apk add -u --no-cache --virtual .build-deps g++ libffi-dev curl-dev \
+    && pip install -r requirements.txt \
+    && apk del --no-cache --purge .build-deps \
+    && rm -rf /var/cache/apk/*
 
-COPY . .
-
-CMD [ "python", "main.py" ]
+COPY . /app
