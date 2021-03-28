@@ -76,7 +76,7 @@ async def tracer(data: TraceData, secret: str = Header("")):
             method=data.method,
             headers=data.headers,
             data=data.data,
-            timeout=120
+            timeout=11
         ).trace()
     except pycurl.error as e:
         return TraceResult().as_dict()
