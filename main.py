@@ -10,10 +10,18 @@ from pydantic import BaseModel, Field
 from tractus import Tracer, TraceResult
 
 
+# Config file path
 CONFIG_PATH = "config/config.cfg"
+# IP geo location api from ipgeolocation.io
+# You can get one for free on their website.
+IP_GEOLOCATION_API_KEY = os.environ.get("IP_GEOLOCATION_API_KEY", "")
 
 
-def get_config():
+def get_config() -> ConfigParser:
+    """
+    Parse the config file.
+    :return: config
+    """
     cfg = ConfigParser()
     cfg.read(CONFIG_PATH)
     return cfg
@@ -30,6 +38,14 @@ class SetupData(BaseModel):
 
 @app.post("/setup")
 async def setup(setup_data: SetupData):
+    """
+    This method is used to setup the agent for the first time.
+    A token will be generated and will be returned as response so trace request can be authenticated with it.
+    You need to provide a name and an id for the agent.
+    It requires an API key from ipgeolocation.io for geo location data.
+    :param setup_data: name and the id of the agent
+    :return: Response containing authentication token and geo location of the agent.
+    """
     if config["STATE"].getboolean("SETUP_STATUS"):
         raise HTTPException(status_code=400, detail={"status": "error", "error": "SETUP_ALREADY_DONE"})
 
@@ -48,7 +64,7 @@ async def setup(setup_data: SetupData):
             "secret": secret,
             "name": setup_data.name,
             "id": setup_data.id,
-            "meta": requests.get("https://api.ipgeolocation.io/ipgeo?apiKey=0ba46625ecf4430e80318749f13499df").json()
+            "meta": requests.get(f'https://api.ipgeolocation.io/ipgeo?apiKey={IP_GEOLOCATION_API_KEY}').json()
         }
     }
     response["data"]["meta"]["latitude"] = float(response["data"]["meta"]["latitude"])
@@ -65,6 +81,14 @@ class TraceData(BaseModel):
 
 @app.post("/trace")
 async def tracer(data: TraceData, secret: str = Header("")):
+    """
+    Main tracer method. Request will be authenticated with the secret key provided on setup.
+    An empty result dictionary will be returned in case the website didn't respond or something failed with pycurl
+
+    :param data: The data needed for tractus to make the request such as body, method, header ant etc.
+    :param secret: secret key return by setup.
+    :return: Trace result.
+    """
     if not secret or secret != config["STATE"].get("AGENT_SECRET", ""):
         raise HTTPException(status_code=403, detail={"status": "error", "error": "Access denied"})
 
@@ -79,6 +103,7 @@ async def tracer(data: TraceData, secret: str = Header("")):
             timeout=11
         ).trace()
     except pycurl.error as e:
+        # return an empty result dictionary if something went wrong.
         return TraceResult().as_dict()
     except Exception as e:
         return {"status": "error", "error": str(e)}, 500
