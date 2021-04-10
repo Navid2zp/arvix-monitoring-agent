@@ -2,7 +2,7 @@
 
 ## What is this?
 
-This a standalone agent built with [FastAPI][2] to be used with [tractus][1] package. You can use this as API server to trace and monitor websites by sending a request describing how you'd like to check the website.
+This a standalone agent built with [FastAPI][2] to be used with [tractus][1] package. You can use this as an API server to trace and monitor websites by sending a request describing how you'd like to check the website.
 
 
 ## Install/Run
