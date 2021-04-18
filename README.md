@@ -9,18 +9,18 @@ This a standalone agent built with [FastAPI][2] to be used with [tractus][1] pac
 
 You'll need a ipgeolocation.io api key for setting up the agent. You can get a free api key from their website.
 
+Set `IP_GEOLOCATION_API_KEY` in your config file.
+
 ### Docker:
 
 The docker image is built on top of [uvicorn-gunicorn-docker][3] image (`python3.8-alpine3.10` version). You can check their github page for more running options.
 ```
-docker run -d --name arvix-agent -e DEBUG=False -e IP_GEOLOCATION_API_KEY=<YOUR_API_KEY> -v /root/arvix_agent/config:/app/config -p 8181:80 docker.pkg.github.com/navid2zp/arvix-monitoring-agent/arvix-monitoring-agent
+docker run -d --name arvix-agent -e DEBUG=False -v /root/arvix_agent/config:/app/config -p 8181:80 docker.pkg.github.com/navid2zp/arvix-monitoring-agent/arvix-monitoring-agent
 ```
 
 ### uvicorn:
 
 You need curl on your server. if you're using ubuntu, you need libcurl4-openssl-dev and libssl-dev installed.
-
-Set `DEBUG` and `IP_GEOLOCATION_API_KEY` environment variables.
 
 ```
 pip install -r requirements.txt

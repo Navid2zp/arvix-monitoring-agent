@@ -9,12 +9,8 @@ from fastapi import FastAPI, Header, HTTPException
 from pydantic import BaseModel, Field
 from tractus import Tracer, TraceResult
 
-
 # Config file path
 CONFIG_PATH = "config/config.cfg"
-# IP geo location api from ipgeolocation.io
-# You can get one for free on their website.
-IP_GEOLOCATION_API_KEY = os.environ.get("IP_GEOLOCATION_API_KEY", "")
 
 
 def get_config() -> ConfigParser:
@@ -64,7 +60,8 @@ async def setup(setup_data: SetupData):
             "secret": secret,
             "name": setup_data.name,
             "id": setup_data.id,
-            "meta": requests.get(f'https://api.ipgeolocation.io/ipgeo?apiKey={IP_GEOLOCATION_API_KEY}').json()
+            "meta": requests.get(
+                f'https://api.ipgeolocation.io/ipgeo?apiKey={config["API"]["IP_GEOLOCATION_API_KEY"]}').json()
         }
     }
     response["data"]["meta"]["latitude"] = float(response["data"]["meta"]["latitude"])
@@ -113,4 +110,3 @@ async def tracer(data: TraceData, secret: str = Header("")):
 @app.get("/test")
 async def test():
     return {"test": "ok"}
-
